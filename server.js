@@ -1,14 +1,3 @@
-import express from "express";
-import fetch from "node-fetch";
-
-const app = express();
-app.use(express.json());
-
-// 🟢 Ruta base
-app.get("/", (req, res) => {
-  res.send("Servidor funcionando 🚀");
-});
-
 // 🟢 IA fácil (GET)
 app.get("/ia", async (req, res) => {
   try {
@@ -28,10 +17,18 @@ app.get("/ia", async (req, res) => {
 
     console.log("IA response:", data);
 
-    const text = data.output?.[0]?.content?.[0]?.text;
+    let text = "";
+
+    if (data.output && data.output.length > 0) {
+      const first = data.output[0];
+
+      if (first.content && first.content.length > 0) {
+        text = first.content[0].text || "";
+      }
+    }
 
     if (!text) {
-      return res.send("Error en IA");
+      return res.send("Error en IA (sin respuesta)");
     }
 
     res.send(text);
@@ -41,6 +38,7 @@ app.get("/ia", async (req, res) => {
     res.send("Error en IA");
   }
 });
+
 
 // 🔵 IA para app (POST)
 app.post("/chat", async (req, res) => {
@@ -63,10 +61,18 @@ app.post("/chat", async (req, res) => {
 
     console.log("Chat response:", data);
 
-    const text = data.output?.[0]?.content?.[0]?.text;
+    let text = "";
+
+    if (data.output && data.output.length > 0) {
+      const first = data.output[0];
+
+      if (first.content && first.content.length > 0) {
+        text = first.content[0].text || "";
+      }
+    }
 
     if (!text) {
-      return res.json({ reply: "Error en IA" });
+      return res.json({ reply: "Error en IA (sin respuesta)" });
     }
 
     res.json({ reply: text });
@@ -75,11 +81,4 @@ app.post("/chat", async (req, res) => {
     console.error("Error:", error);
     res.status(500).json({ reply: "Error en IA" });
   }
-});
-
-// 🔥 puerto
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log("Servidor corriendo en puerto " + PORT);
 });
