@@ -9,7 +9,7 @@ app.get("/", (req, res) => {
   res.send("Servidor funcionando 🚀");
 });
 
-// 🟢 IA fácil (para navegador)
+// 🟢 IA fácil (GET)
 app.get("/ia", async (req, res) => {
   try {
     const response = await fetch("https://api.openai.com/v1/responses", {
@@ -26,15 +26,23 @@ app.get("/ia", async (req, res) => {
 
     const data = await response.json();
 
-    res.send(data.output[0].content[0].text);
+    console.log("IA response:", data);
+
+    const text = data.output?.[0]?.content?.[0]?.text;
+
+    if (!text) {
+      return res.send("Error en IA");
+    }
+
+    res.send(text);
 
   } catch (error) {
-    console.error(error);
+    console.error("Error:", error);
     res.send("Error en IA");
   }
 });
 
-// 🔵 IA real (para tu app)
+// 🔵 IA para app (POST)
 app.post("/chat", async (req, res) => {
   try {
     const userMessage = req.body.message;
@@ -53,17 +61,23 @@ app.post("/chat", async (req, res) => {
 
     const data = await response.json();
 
-    res.json({
-      reply: data.output[0].content[0].text
-    });
+    console.log("Chat response:", data);
+
+    const text = data.output?.[0]?.content?.[0]?.text;
+
+    if (!text) {
+      return res.json({ reply: "Error en IA" });
+    }
+
+    res.json({ reply: text });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error en IA" });
+    console.error("Error:", error);
+    res.status(500).json({ reply: "Error en IA" });
   }
 });
 
-// 🔥 puerto Render
+// 🔥 puerto
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
